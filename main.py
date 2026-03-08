@@ -12,61 +12,28 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Geminiの初期化
 genai.configure(api_key=GEMINI_API_KEY)
 
-# 最も安定している 'gemini-pro' を使用します
-# (1.5-flashでエラーが出る環境でも、こちらは動作することが多いです)
-model = genai.GenerativeModel('gemini-pro')
+# モデル名を 'gemini-1.5-flash' に指定
+# (画像にある無料枠のキーで最も推奨されるモデルです)
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 def get_ai_news_summary():
-    """最新のAI関連ニュースを検索して要約する"""
     yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    
-    prompt = f"""
-    最新のAI関連ニュース（{yesterday}から本日まで）を以下の構成で合計5件ピックアップし、
-    日本のユーザー向けに分かりやすく要約してください。
-    
-    【構成】
-    1. 生成AI関連（画像生成、動画生成、LLMなど）：3件
-    2. その他のAI関連（ロボティクス、医療AI、AI規制、ハードウェアなど）：2件
-    
-    フォーマット：
-    【AIニュースまとめ】 (日付)
-    
-    ■ 生成AI関連 (3件)
-    1. [ニュースタイトル]
-    要約内容...
-    
-    2. [ニュースタイトル]
-    要約内容...
-    
-    3. [ニュースタイトル]
-    要約内容...
-    
-    ■ その他のAI関連 (2件)
-    4. [ニュースタイトル]
-    要約内容...
-    
-    5. [ニュースタイトル]
-    要約内容...
-    
-    最後に「今日も一日頑張りましょう！」と一言添えてください。
-    """
+    prompt = f"最新のAI関連ニュース（{yesterday}から本日まで）を生成AI関連3件、その他2件の計5件で要約してください..."
     
     try:
         # 生成の実行
         response = model.generate_content(prompt)
         
-        # レスポンスのチェック
-        if hasattr(response, 'text'):
+        # テキストの取得（安全な方法）
+        if response.candidates:
             return response.text
         else:
-            # 安全策として、候補からテキストを取得
-            return response.candidates[0].content.parts[0].text
+            return "ニュースの取得に失敗しました（AIからの応答がありません）。"
             
     except Exception as e:
         return f"ニュースの取得中にエラーが発生しました: {str(e)}"
 
 def send_line_message(text):
-    """LINE Messaging APIを使用してメッセージを送信する"""
     url = "https://api.line.me/v2/bot/message/push"
     headers = {
         "Content-Type": "application/json",
