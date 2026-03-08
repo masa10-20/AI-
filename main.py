@@ -12,25 +12,25 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Geminiの初期化
 genai.configure(api_key=GEMINI_API_KEY)
 
-# モデル名を 'gemini-1.5-flash' に指定
-# (画像にある無料枠のキーで最も推奨されるモデルです)
+# 最も互換性の高い 'gemini-1.5-flash' を指定
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 def get_ai_news_summary():
     yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    prompt = f"最新のAI関連ニュース（{yesterday}から本日まで）を生成AI関連3件、その他2件の計5件で要約してください..."
+    prompt = f"最新のAI関連ニュース（{yesterday}から本日まで）を生成AI関連3件、その他2件の計5件で要約してください。"
     
     try:
         # 生成の実行
         response = model.generate_content(prompt)
         
-        # テキストの取得（安全な方法）
-        if response.candidates:
+        # テキストの取得
+        if response and response.text:
             return response.text
         else:
             return "ニュースの取得に失敗しました（AIからの応答がありません）。"
             
     except Exception as e:
+        # エラーの詳細を出力
         return f"ニュースの取得中にエラーが発生しました: {str(e)}"
 
 def send_line_message(text):
