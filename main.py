@@ -11,7 +11,9 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Geminiの初期化
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('models/gemini-pro')
+
+# モデル名を 'gemini-1.5-flash' に戻し、よりシンプルな指定方法にします
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 def get_ai_news_summary():
     """最新のAI関連ニュースを検索して要約する"""
@@ -49,9 +51,15 @@ def get_ai_news_summary():
     """
     
     try:
+        # 安全のために、より確実な生成メソッドを使用します
         response = model.generate_content(prompt)
-        return response.text
+        # テキストが空でないか確認
+        if response and response.text:
+            return response.text
+        else:
+            return "ニュースの取得に失敗しました（レスポンスが空です）。"
     except Exception as e:
+        # エラーメッセージを詳細に出力するように変更
         return f"ニュースの取得中にエラーが発生しました: {str(e)}"
 
 def send_line_message(text):
